@@ -1,0 +1,6 @@
+@ABInBev.Employees_HostAddress = http://localhost:5227
+
+GET {{ABInBev.Employees_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
