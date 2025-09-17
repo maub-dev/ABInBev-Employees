@@ -53,3 +53,4 @@ CodeCoverage/
 TestResult.xml
 nunit-*.xml
 /ABInBev.Employees/.vs/ABInBev.Employees
+/ABInBev.Employees/.vs/ProjectEvaluation
