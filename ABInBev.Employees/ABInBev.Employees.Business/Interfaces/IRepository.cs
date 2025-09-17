@@ -5,9 +5,9 @@ namespace ABInBev.Employees.Business.Interfaces
     public interface IRepository<TEntity> 
         where TEntity : Entity
     {
-        IEnumerable<TEntity> GetAll();
-        TEntity? GetById(Guid id);
-        void Add(TEntity entity);
-        void Delete(Guid id);
+        Task<List<TEntity>> GetAllAsync();
+        Task<TEntity?> GetByIdAsync(Guid id);
+        Task AddAsync(TEntity entity);
+        Task DeleteAsync(Guid id);
     }
 }

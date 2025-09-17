@@ -3,8 +3,8 @@ using Microsoft.EntityFrameworkCore;
 
 namespace ABInBev.Employees.Data.Context
 {
-    public class EmployeeDbContext
+    public class EmployeeDbContext(DbContextOptions<EmployeeDbContext> options) : DbContext(options)
     {
-        public List<Employee> Employees { get; set; } = [];
+        public DbSet<Employee> Employees { get; set; }
     }
 }

@@ -14,26 +14,22 @@ namespace ABInBev.Employees.Business.Services
 
         public async Task AddAsync(Employee employee)
         {
-            await Task.Yield();
-            _repository.Add(employee);
+            await _repository.AddAsync(employee);
         }
 
         public async Task DeleteAsync(Guid id)
         {
-            await Task.Yield();
-            _repository.Delete(id);
+            await _repository.DeleteAsync(id);
         }
 
         public async Task<IEnumerable<Employee>> GetAllAsync()
         {
-            await Task.Yield();
-            return _repository.GetAll();
+            return await _repository.GetAllAsync();
         }
 
         public async Task<Employee> GetByIdAsync(Guid id)
         {
-            await Task.Yield();
-            return _repository.GetById(id);
+            return await _repository.GetByIdAsync(id);
         }
     }
 }
