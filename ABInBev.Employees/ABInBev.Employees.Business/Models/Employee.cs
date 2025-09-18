@@ -6,13 +6,18 @@ namespace ABInBev.Employees.Business.Models
     {
         [Required]
         public string FirstName { get; set; }
+
         [Required]
         public string LastName { get; set; }
+
         [Required, EmailAddress]
         public string Email { get; set; }
-        [Required] //Unique
+
+        [Required]
         public string DocumentNumber { get; set; }
+
         public string Password { get; set; }
+        
         //Must validate that the person is not a minor.
         public DateOnly BirthDate { get; set; }
 

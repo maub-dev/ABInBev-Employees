@@ -1,5 +1,6 @@
 ﻿using ABInBev.Employees.Business.Interfaces;
 using ABInBev.Employees.Business.Models;
+using ABInBev.Employees.Business.Models.Validators;
 
 namespace ABInBev.Employees.Business.Services
 {
@@ -20,16 +21,19 @@ namespace ABInBev.Employees.Business.Services
             {
                 phone.Employee = employee;
             }
+            ValidatorHelper.Validate(new EmployeeValidator(_repository), employee);
+
             await _repository.AddAsync(employee);
         }
 
         public async Task UpdateAsync(Employee employee)
         {
+            ValidatorHelper.Validate(new EmployeeValidator(_repository), employee);
+
             var employeeDb = await _repository.GetByIdAsync(employee.Id);
             if (employeeDb is null)
-            {
                 throw new Exception($"The Employee {employee.Id} was not found.");
-            }
+
             employeeDb.BirthDate = employee.BirthDate;
             employeeDb.DocumentNumber = employee.DocumentNumber;
             employeeDb.Email = employee.Email;
