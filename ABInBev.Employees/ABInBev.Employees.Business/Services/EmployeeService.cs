@@ -18,7 +18,7 @@ namespace ABInBev.Employees.Business.Services
             _userManager = userManager;
         }
 
-        public async Task AddAsync(Employee employee)
+        public async Task AddAsync(Employee employee, string password)
         {
             foreach (var phone in employee.Phones)
             {
@@ -33,7 +33,7 @@ namespace ABInBev.Employees.Business.Services
                 EmailConfirmed = true
             };
 
-            var identityResult = await _userManager.CreateAsync(user, employee.Password);
+            var identityResult = await _userManager.CreateAsync(user, password);
             if (!identityResult.Succeeded)
             {
                 var errorMessage = string.Empty;
@@ -41,6 +41,7 @@ namespace ABInBev.Employees.Business.Services
                 throw new InvalidOperationException(errorMessage);
             }
 
+            employee.UserIdentityId = user.Id;
             await _repository.AddAsync(employee);
         }
 
@@ -57,7 +58,6 @@ namespace ABInBev.Employees.Business.Services
             employeeDb.Email = employee.Email;
             employeeDb.FirstName = employee.FirstName;
             employeeDb.LastName = employee.LastName;
-            employeeDb.Password = employee.Password;
 
             await _repository.UpdateAsync(employeeDb);
 
@@ -74,12 +74,9 @@ namespace ABInBev.Employees.Business.Services
             var employee = await GetByIdAsync(id);
             await _repository.DeleteAsync(id);
 
-            var user = new IdentityUser
-            {
-                UserName = employee.Email,
-                Email = employee.Email
-            };
-            await _userManager.DeleteAsync(user);
+            var user = await _userManager.FindByIdAsync(employee.UserIdentityId);
+            if (user is not null)
+                await _userManager.DeleteAsync(user);
         }
 
         public async Task<IEnumerable<Employee>> GetAllAsync()

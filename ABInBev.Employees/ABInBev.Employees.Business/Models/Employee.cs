@@ -16,8 +16,8 @@ namespace ABInBev.Employees.Business.Models
         [Required]
         public string DocumentNumber { get; set; }
 
-        public string Password { get; set; }
-        
+        public string UserIdentityId { get; set; }
+
         //Must validate that the person is not a minor.
         public DateOnly BirthDate { get; set; }
 

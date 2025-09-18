@@ -1,4 +1,5 @@
-﻿using ABInBev.Employees.Business.Interfaces;
+﻿using ABInBev.Employees.API.DTOs;
+using ABInBev.Employees.Business.Interfaces;
 using ABInBev.Employees.Business.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -30,9 +31,9 @@ namespace ABInBev.Employees.API.Controllers
         }
 
         [HttpPost(Name = "AddEmployee")]
-        public async Task Post(Employee employee)
+        public async Task Post(EmployeeDTO employee)
         {
-            await _employeeService.AddAsync(employee);
+            await _employeeService.AddAsync(employee.ToEmployee(), employee.Password);
         }
 
         [HttpPut(Name = "UpdateEmployee")]

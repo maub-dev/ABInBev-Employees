@@ -28,9 +28,9 @@ namespace ABInBev.Employees.Data.Mappings
             builder.Property(x => x.DocumentNumber)
                 .HasColumnType("varchar(30)");
 
-            builder.Property(x => x.Password)
+            builder.Property(x => x.UserIdentityId)
                 .IsRequired()
-                .HasColumnType("varchar(100)");
+                .HasColumnType("varchar(200)");
 
             builder.Property(x => x.BirthDate)
                 .IsRequired()
