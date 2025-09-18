@@ -17,6 +17,7 @@ builder.Services.AddDbContext<EmployeeDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("EmployeesConnection"));
 });
+builder.Services.AddScoped<EmployeeDbContext>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 

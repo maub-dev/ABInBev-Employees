@@ -19,6 +19,6 @@ namespace ABInBev.Employees.Business.Models
         [MinLength(2)]
         public List<Phonebook> Phones { get; set; }
         //You cannot create a user with higher permissions than the current one.In other words, an employee cannot create a leader, and a leader cannot create a director.
-        public Employee? Manager { get; set; }
+        //public Employee? Manager { get; set; }
     }
 }

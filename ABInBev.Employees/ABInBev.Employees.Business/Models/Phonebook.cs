@@ -6,5 +6,8 @@ namespace ABInBev.Employees.Business.Models
     {
         public PhoneType Type { get; set; }
         public string PhoneNumber { get; set; }
+        public Guid EmployeeId { get; set; }
+
+        public Employee? Employee { get; set; }
     }
 }

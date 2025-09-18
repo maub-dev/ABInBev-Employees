@@ -14,6 +14,10 @@ namespace ABInBev.Employees.Business.Services
 
         public async Task AddAsync(Employee employee)
         {
+            foreach (var phone in employee.Phones)
+            {
+                phone.Employee = employee;
+            }
             await _repository.AddAsync(employee);
         }
 

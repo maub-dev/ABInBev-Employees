@@ -30,13 +30,17 @@ namespace ABInBev.Employees.Data.Repositories
         public async Task AddAsync(TEntity entity)
         {
             await _dbSet.AddAsync(entity);
+            await _dbContext.SaveChangesAsync();
         }
 
         public async Task DeleteAsync(Guid id)
         {
             var entity = await GetByIdAsync(id);
             if (entity != null)
+            {
                 _dbSet.Remove(entity);
+                await _dbContext.SaveChangesAsync();
+            }
         }
     }
 }
