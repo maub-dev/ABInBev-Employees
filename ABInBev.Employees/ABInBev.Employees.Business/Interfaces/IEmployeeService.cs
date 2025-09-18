@@ -5,7 +5,7 @@ namespace ABInBev.Employees.Business.Interfaces
     public interface IEmployeeService
     {
         Task<IEnumerable<Employee>> GetAllAsync();
-        Task<Employee> GetByIdAsync(Guid id);
+        Task<Employee?> GetByIdAsync(Guid id);
         Task AddAsync(Employee employee, string password);
         Task UpdateAsync(Employee employee);
         Task DeleteAsync(Guid id);

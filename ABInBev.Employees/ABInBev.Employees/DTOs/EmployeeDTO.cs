@@ -6,25 +6,44 @@ namespace ABInBev.Employees.API.DTOs
 {
     public class EmployeeDTO
     {
-        [Required]
-        public string FirstName { get; set; }
+        public EmployeeDTO() { }
+
+        public EmployeeDTO(Employee employee)
+        {
+            Id = employee.Id;
+            BirthDate = employee.BirthDate;
+            FirstName = employee.FirstName;
+            LastName = employee.LastName;
+            DocumentNumber = employee.DocumentNumber;
+            Email = employee.Email;
+            Phonebook = employee.Phones?.Select(x => new PhonebookDTO
+            {
+                Phone = x.PhoneNumber,
+                Type = (int)x.Type
+            }).ToList() ?? [];
+        }
+
+        public Guid Id { get; set; }
 
         [Required]
-        public string LastName { get; set; }
+        public string FirstName { get; set; } = string.Empty;
+
+        [Required]
+        public string LastName { get; set; } = string.Empty;
 
         [Required, EmailAddress]
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
         [Required]
-        public string DocumentNumber { get; set; }
+        public string DocumentNumber { get; set; } = string.Empty;
 
         //More than one
-        public List<PhonebookDTO> Phonebook { get; set; }
+        public List<PhonebookDTO> Phonebook { get; set; } = [];
 
         //You cannot create a user with higher permissions than the current one.In other words, an employee cannot create a leader, and a leader cannot create a director.
         //public Employee Manager { get; set; }
 
-        public string Password { get; set; }
+        public string Password { get; set; } = string.Empty;
 
         //Must validate that the person is not a minor.
         public DateOnly BirthDate { get; set; }

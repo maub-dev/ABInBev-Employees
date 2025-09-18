@@ -72,6 +72,8 @@ namespace ABInBev.Employees.Business.Services
         public async Task DeleteAsync(Guid id)
         {
             var employee = await GetByIdAsync(id);
+            if (employee is null) return;
+
             await _repository.DeleteAsync(id);
 
             var user = await _userManager.FindByIdAsync(employee.UserIdentityId);
@@ -84,9 +86,9 @@ namespace ABInBev.Employees.Business.Services
             return await _repository.GetAllAsync();
         }
 
-        public async Task<Employee> GetByIdAsync(Guid id)
+        public async Task<Employee?> GetByIdAsync(Guid id)
         {
-            return await _repository.GetByIdAsync(id);
+            return await _repository.GetByIdWithIncludesAsync(id);
         }
     }
 }

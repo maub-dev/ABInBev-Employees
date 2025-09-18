@@ -19,15 +19,17 @@ namespace ABInBev.Employees.API.Controllers
         }
 
         [HttpGet("all", Name = "GetAllEmployees")]
-        public async Task<IEnumerable<Employee>> Get()
+        public async Task<IEnumerable<EmployeeDTO>> Get()
         {
-            return await _employeeService.GetAllAsync();
+            var employees = await _employeeService.GetAllAsync();
+
+            return employees.Select(x => new EmployeeDTO(x));
         }
 
         [HttpGet(Name = "GetEmployee")]
-        public async Task<Employee> Get(Guid id)
+        public async Task<EmployeeDTO> Get(Guid id)
         {
-            return await _employeeService.GetByIdAsync(id);
+            return new EmployeeDTO(await _employeeService.GetByIdAsync(id));
         }
 
         [HttpPost(Name = "AddEmployee")]
