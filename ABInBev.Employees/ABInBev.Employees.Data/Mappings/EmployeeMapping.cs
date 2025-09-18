@@ -10,6 +10,8 @@ namespace ABInBev.Employees.Data.Mappings
         {
             builder.ToTable("Employees");
             builder.HasKey(x => x.Id);
+            builder.HasIndex(x => x.DocumentNumber)
+                .IsUnique();
 
             builder.Property(x => x.FirstName)
                 .IsRequired()
