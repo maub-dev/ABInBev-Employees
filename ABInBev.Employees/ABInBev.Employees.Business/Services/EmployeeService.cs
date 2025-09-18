@@ -1,6 +1,7 @@
 ﻿using ABInBev.Employees.Business.Interfaces;
 using ABInBev.Employees.Business.Models;
 using ABInBev.Employees.Business.Models.Validators;
+using Microsoft.AspNetCore.Identity;
 
 namespace ABInBev.Employees.Business.Services
 {
@@ -8,11 +9,13 @@ namespace ABInBev.Employees.Business.Services
     {
         private readonly IEmployeeRepository _repository;
         private readonly IPhonebookRepository _phonebookRepository;
+        private readonly UserManager<IdentityUser> _userManager;
 
-        public EmployeeService(IEmployeeRepository repository, IPhonebookRepository phonebookRepository)
+        public EmployeeService(IEmployeeRepository repository, IPhonebookRepository phonebookRepository, UserManager<IdentityUser> userManager)
         {
             _repository = repository;
             _phonebookRepository = phonebookRepository;
+            _userManager = userManager;
         }
 
         public async Task AddAsync(Employee employee)
@@ -21,14 +24,29 @@ namespace ABInBev.Employees.Business.Services
             {
                 phone.Employee = employee;
             }
-            ValidatorHelper.Validate(new EmployeeValidator(_repository), employee);
+            await ValidatorHelper.ValidateAsync(new EmployeeValidator(_repository), employee);
+
+            var user = new IdentityUser
+            {
+                UserName = employee.Email,
+                Email = employee.Email,
+                EmailConfirmed = true
+            };
+
+            var identityResult = await _userManager.CreateAsync(user, employee.Password);
+            if (!identityResult.Succeeded)
+            {
+                var errorMessage = string.Empty;
+                identityResult.Errors.ToList().ForEach(x => errorMessage += $"{x.Code}: {x.Description}");
+                throw new InvalidOperationException(errorMessage);
+            }
 
             await _repository.AddAsync(employee);
         }
 
         public async Task UpdateAsync(Employee employee)
         {
-            ValidatorHelper.Validate(new EmployeeValidator(_repository), employee);
+            await ValidatorHelper.ValidateAsync(new EmployeeValidator(_repository), employee);
 
             var employeeDb = await _repository.GetByIdAsync(employee.Id);
             if (employeeDb is null)
@@ -53,7 +71,15 @@ namespace ABInBev.Employees.Business.Services
 
         public async Task DeleteAsync(Guid id)
         {
+            var employee = await GetByIdAsync(id);
             await _repository.DeleteAsync(id);
+
+            var user = new IdentityUser
+            {
+                UserName = employee.Email,
+                Email = employee.Email
+            };
+            await _userManager.DeleteAsync(user);
         }
 
         public async Task<IEnumerable<Employee>> GetAllAsync()

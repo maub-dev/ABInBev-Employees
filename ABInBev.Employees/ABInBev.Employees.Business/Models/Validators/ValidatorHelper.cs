@@ -5,17 +5,17 @@ namespace ABInBev.Employees.Business.Models.Validators
 {
     public static class ValidatorHelper
     {
-        public static void Validate<T>(AbstractValidator<T> validator, T entity)
+        public static async Task ValidateAsync<T>(AbstractValidator<T> validator, T entity)
         {
-            var results = validator.Validate(entity);
+            var results = await validator.ValidateAsync(entity);
 
-            var errors = new Dictionary<string, string>();
-            foreach (var error in results.Errors)
+            if (results.Errors.Count != 0)
             {
-                errors.Add(error.PropertyName, error.ErrorMessage);
-            }
+                var errorMessage = string.Empty;
+                results.Errors.ForEach(x => errorMessage += $"{x.PropertyName}: {x.ErrorMessage}");
 
-            throw new InvalidOperationException(errors.ToString());
+                throw new InvalidOperationException(errorMessage);
+            }
         }
 
         public static Dictionary<string, string> GetErrors(ValidationResult result)

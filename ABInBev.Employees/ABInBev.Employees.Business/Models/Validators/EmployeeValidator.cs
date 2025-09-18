@@ -17,7 +17,8 @@ namespace ABInBev.Employees.Business.Models.Validators
                 .EmailAddress(FluentValidation.Validators.EmailValidationMode.AspNetCoreCompatible);
 
             RuleFor(x => x.DocumentNumber).NotEmpty()
-                .MustAsync((documentNumber, dummy) => employeeRepository.IsDocumentNumberInUseAsync(documentNumber)).WithMessage("This Document Number is already in use.");
+                .MustAsync(async (documentNumber, dummy) => !(await employeeRepository.IsDocumentNumberInUseAsync(documentNumber)))
+                    .WithMessage("This Document Number is already in use.");
 
             RuleFor(x => x.BirthDate).NotEmpty();
 

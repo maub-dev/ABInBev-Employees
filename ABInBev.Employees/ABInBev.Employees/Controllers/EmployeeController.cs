@@ -1,13 +1,13 @@
-﻿using ABInBev.Employees.API.DTOs;
-using ABInBev.Employees.Business.Interfaces;
+﻿using ABInBev.Employees.Business.Interfaces;
 using ABInBev.Employees.Business.Models;
-using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ABInBev.Employees.API.Controllers
 {
     [ApiController]
     [Route("[controller]")]
+    [Authorize]
     public class EmployeeController : ControllerBase
     {
         private readonly IEmployeeService _employeeService;
