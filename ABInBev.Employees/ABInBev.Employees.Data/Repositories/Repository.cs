@@ -33,6 +33,18 @@ namespace ABInBev.Employees.Data.Repositories
             await _dbContext.SaveChangesAsync();
         }
 
+        public async Task AddRangeAsync(IEnumerable<TEntity> entities)
+        {
+            await _dbSet.AddRangeAsync(entities);
+            await _dbContext.SaveChangesAsync();
+        }
+
+        public async Task UpdateAsync(TEntity entity)
+        {
+            _dbSet.Update(entity);
+            await _dbContext.SaveChangesAsync();
+        }
+
         public async Task DeleteAsync(Guid id)
         {
             var entity = await GetByIdAsync(id);

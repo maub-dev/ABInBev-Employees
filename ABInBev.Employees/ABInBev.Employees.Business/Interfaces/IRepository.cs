@@ -8,6 +8,8 @@ namespace ABInBev.Employees.Business.Interfaces
         Task<List<TEntity>> GetAllAsync();
         Task<TEntity?> GetByIdAsync(Guid id);
         Task AddAsync(TEntity entity);
+        Task AddRangeAsync(IEnumerable<TEntity> entities);
+        Task UpdateAsync(TEntity entity);
         Task DeleteAsync(Guid id);
     }
 }

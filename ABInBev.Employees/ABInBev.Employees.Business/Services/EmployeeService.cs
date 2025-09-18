@@ -6,10 +6,12 @@ namespace ABInBev.Employees.Business.Services
     public class EmployeeService : IEmployeeService
     {
         private readonly IEmployeeRepository _repository;
+        private readonly IPhonebookRepository _phonebookRepository;
 
-        public EmployeeService(IEmployeeRepository repository)
+        public EmployeeService(IEmployeeRepository repository, IPhonebookRepository phonebookRepository)
         {
             _repository = repository;
+            _phonebookRepository = phonebookRepository;
         }
 
         public async Task AddAsync(Employee employee)
@@ -19,6 +21,30 @@ namespace ABInBev.Employees.Business.Services
                 phone.Employee = employee;
             }
             await _repository.AddAsync(employee);
+        }
+
+        public async Task UpdateAsync(Employee employee)
+        {
+            var employeeDb = await _repository.GetByIdAsync(employee.Id);
+            if (employeeDb is null)
+            {
+                throw new Exception($"The Employee {employee.Id} was not found.");
+            }
+            employeeDb.BirthDate = employee.BirthDate;
+            employeeDb.DocumentNumber = employee.DocumentNumber;
+            employeeDb.Email = employee.Email;
+            employeeDb.FirstName = employee.FirstName;
+            employeeDb.LastName = employee.LastName;
+            employeeDb.Password = employee.Password;
+
+            await _repository.UpdateAsync(employeeDb);
+
+            await _phonebookRepository.RemoveAllPhonesFromEmployeeAsync(employeeDb.Id);
+            foreach (var phone in employee.Phones)
+            {
+                phone.EmployeeId = employeeDb.Id;
+            }
+            await _phonebookRepository.AddRangeAsync(employee.Phones);
         }
 
         public async Task DeleteAsync(Guid id)

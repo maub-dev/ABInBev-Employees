@@ -35,6 +35,12 @@ namespace ABInBev.Employees.API.Controllers
             await _employeeService.AddAsync(employee);
         }
 
+        [HttpPut(Name = "UpdateEmployee")]
+        public async Task Put(Employee employee)
+        {
+            await _employeeService.UpdateAsync(employee);
+        }
+
         [HttpDelete(Name = "DeleteEmployee")]
         public async Task Delete(Guid id)
         {

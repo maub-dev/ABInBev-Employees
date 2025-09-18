@@ -19,6 +19,7 @@ builder.Services.AddDbContext<EmployeeDbContext>(options =>
 });
 builder.Services.AddScoped<EmployeeDbContext>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
+builder.Services.AddScoped<IPhonebookRepository, PhonebookRepository>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 
 var app = builder.Build();

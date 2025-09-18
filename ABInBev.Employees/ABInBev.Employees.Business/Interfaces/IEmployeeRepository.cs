@@ -4,5 +4,6 @@ namespace ABInBev.Employees.Business.Interfaces
 {
     public interface IEmployeeRepository : IRepository<Employee>
     {
+        Task<Employee?> GetByIdWithIncludesAsync(Guid id);
     }
 }
