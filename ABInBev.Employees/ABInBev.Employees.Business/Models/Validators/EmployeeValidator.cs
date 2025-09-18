@@ -22,8 +22,7 @@ namespace ABInBev.Employees.Business.Models.Validators
             RuleFor(x => x.BirthDate).NotEmpty();
 
             RuleFor(x => x.Phones).NotEmpty()
-                .Must(x => x is not null && x.Count > 1).WithMessage("At least 2 phones are required.")
-                .SetValidator(x => );
+                .Must(x => x is not null && x.Count > 1).WithMessage("At least 2 phones are required.");
         }
     }
 }
