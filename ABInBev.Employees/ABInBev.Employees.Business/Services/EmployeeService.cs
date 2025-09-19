@@ -51,7 +51,7 @@ namespace ABInBev.Employees.Business.Services
 
             var employeeDb = await _repository.GetByIdAsync(employee.Id);
             if (employeeDb is null)
-                throw new Exception($"The Employee {employee.Id} was not found.");
+                throw new InvalidOperationException($"The Employee {employee.Id} was not found.");
 
             employeeDb.BirthDate = employee.BirthDate;
             employeeDb.DocumentNumber = employee.DocumentNumber;

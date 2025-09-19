@@ -20,7 +20,9 @@ namespace ABInBev.Employees.Business.Models.Validators
                 .MustAsync(async (documentNumber, dummy) => !(await employeeRepository.IsDocumentNumberInUseAsync(documentNumber)))
                     .WithMessage("This Document Number is already in use.");
 
-            RuleFor(x => x.BirthDate).NotEmpty();
+            RuleFor(x => x.BirthDate).NotEmpty()
+                .Must(x => x.Year <= DateTime.Now.AddYears(-18).Year)
+                .WithMessage("The Employee must have at least 18 years old.");
 
             RuleFor(x => x.Phones).NotEmpty()
                 .Must(x => x is not null && x.Count > 1).WithMessage("At least 2 phones are required.");
