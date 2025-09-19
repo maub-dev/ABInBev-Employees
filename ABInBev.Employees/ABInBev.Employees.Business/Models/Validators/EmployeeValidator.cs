@@ -5,10 +5,8 @@ namespace ABInBev.Employees.Business.Models.Validators
 {
     public class EmployeeValidator : AbstractValidator<Employee>
     {
-        public EmployeeValidator(IEmployeeRepository employeeRepository)
+        public EmployeeValidator(IEmployeeRepository employeeRepository, Guid? employeeId)
         {
-            RuleFor(x => x.Id).NotEmpty();
-
             RuleFor(x => x.FirstName).NotEmpty();
 
             RuleFor(x => x.LastName).NotEmpty();
@@ -17,7 +15,7 @@ namespace ABInBev.Employees.Business.Models.Validators
                 .EmailAddress(FluentValidation.Validators.EmailValidationMode.AspNetCoreCompatible);
 
             RuleFor(x => x.DocumentNumber).NotEmpty()
-                .MustAsync(async (documentNumber, dummy) => !(await employeeRepository.IsDocumentNumberInUseAsync(documentNumber)))
+                .MustAsync(async (documentNumber, dummy) => !(await employeeRepository.IsDocumentNumberInUseAsync(documentNumber, employeeId)))
                     .WithMessage("This Document Number is already in use.");
 
             RuleFor(x => x.BirthDate).NotEmpty()

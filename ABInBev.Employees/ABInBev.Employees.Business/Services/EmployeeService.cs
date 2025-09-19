@@ -24,7 +24,7 @@ namespace ABInBev.Employees.Business.Services
             {
                 phone.Employee = employee;
             }
-            await ValidatorHelper.ValidateAsync(new EmployeeValidator(_repository), employee);
+            await ValidatorHelper.ValidateAsync(new EmployeeValidator(_repository, null), employee);
 
             var user = new IdentityUser
             {
@@ -47,7 +47,7 @@ namespace ABInBev.Employees.Business.Services
 
         public async Task UpdateAsync(Employee employee)
         {
-            await ValidatorHelper.ValidateAsync(new EmployeeValidator(_repository), employee);
+            await ValidatorHelper.ValidateAsync(new EmployeeValidator(_repository, employee.Id), employee);
 
             var employeeDb = await _repository.GetByIdAsync(employee.Id);
             if (employeeDb is null)
@@ -55,7 +55,7 @@ namespace ABInBev.Employees.Business.Services
 
             employeeDb.BirthDate = employee.BirthDate;
             employeeDb.DocumentNumber = employee.DocumentNumber;
-            employeeDb.Email = employee.Email;
+            employeeDb.Email = employeeDb.Email;
             employeeDb.FirstName = employee.FirstName;
             employeeDb.LastName = employee.LastName;
 

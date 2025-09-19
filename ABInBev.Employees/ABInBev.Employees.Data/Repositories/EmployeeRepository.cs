@@ -12,8 +12,11 @@ namespace ABInBev.Employees.Data.Repositories
             return await _dbSet.Include(x => x.Phones).FirstOrDefaultAsync(x => x.Id == id);
         }
 
-        public async Task<bool> IsDocumentNumberInUseAsync(string documentNumber)
+        public async Task<bool> IsDocumentNumberInUseAsync(string documentNumber, Guid? id)
         {
+            if (id.HasValue)
+                return await _dbSet.AnyAsync(x => x.DocumentNumber == documentNumber && x.Id != id);
+
             return await _dbSet.AnyAsync(x => x.DocumentNumber == documentNumber);
         }
     }

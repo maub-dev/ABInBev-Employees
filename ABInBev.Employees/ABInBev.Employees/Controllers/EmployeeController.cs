@@ -19,35 +19,45 @@ namespace ABInBev.Employees.API.Controllers
         }
 
         [HttpGet("all", Name = "GetAllEmployees")]
-        public async Task<IEnumerable<EmployeeDTO>> Get()
+        public async Task<ActionResult<IEnumerable<EmployeeDTO>>> Get()
         {
             var employees = await _employeeService.GetAllAsync();
 
-            return employees.Select(x => new EmployeeDTO(x));
+            return Ok(employees.Select(x => new EmployeeDTO(x)));
         }
 
         [HttpGet(Name = "GetEmployee")]
-        public async Task<EmployeeDTO> Get(Guid id)
+        public async Task<ActionResult<EmployeeDTO>> Get(Guid id)
         {
-            return new EmployeeDTO(await _employeeService.GetByIdAsync(id));
+            var employee = await _employeeService.GetByIdAsync(id);
+            if (employee is null)
+                return NotFound();
+
+            return Ok(new EmployeeDTO(employee));
         }
 
         [HttpPost(Name = "AddEmployee")]
-        public async Task Post(EmployeeDTO employee)
+        public async Task<ActionResult> Post(EmployeeDTO employee)
         {
             await _employeeService.AddAsync(employee.ToEmployee(), employee.Password);
+
+            return Ok();
         }
 
         [HttpPut(Name = "UpdateEmployee")]
-        public async Task Put(Employee employee)
+        public async Task<ActionResult> Put(EmployeeDTO employee)
         {
-            await _employeeService.UpdateAsync(employee);
+            await _employeeService.UpdateAsync(employee.ToEmployee());
+
+            return Ok();
         }
 
         [HttpDelete(Name = "DeleteEmployee")]
-        public async Task Delete(Guid id)
+        public async Task<ActionResult> Delete(Guid id)
         {
             await _employeeService.DeleteAsync(id);
+
+            return Ok();
         }
     }
 }

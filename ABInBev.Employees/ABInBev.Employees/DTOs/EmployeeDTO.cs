@@ -52,6 +52,7 @@ namespace ABInBev.Employees.API.DTOs
         {
             return new Employee
             {
+                Id = Id,
                 FirstName = FirstName,
                 LastName = LastName,
                 Email = Email,

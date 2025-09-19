@@ -114,7 +114,7 @@ namespace ABInBev.Employees.Business.Tests
                 .Returns(Task.CompletedTask);
 
             _employeeRepoMock
-                .Setup(x => x.IsDocumentNumberInUseAsync(It.IsAny<string>()))
+                .Setup(x => x.IsDocumentNumberInUseAsync(It.IsAny<string>(), It.IsAny<Guid?>()))
                 .ReturnsAsync(() => true);
 
             // Act & Assert
