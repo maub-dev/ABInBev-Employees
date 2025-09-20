@@ -1,21 +1,16 @@
+using ABInBev.Employees.API.Configuration;
 using ABInBev.Employees.Business.Interfaces;
 using ABInBev.Employees.Business.Services;
 using ABInBev.Employees.Data.Context;
 using ABInBev.Employees.Data.Repositories;
-using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.IdentityModel.Tokens;
-using Microsoft.OpenApi.Models;
-using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(
-        builder =>
+    options.AddDefaultPolicy(builder =>
         {
             builder.AllowAnyOrigin()
                    .AllowAnyHeader()
@@ -26,7 +21,7 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+//builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<EmployeeDbContext>(options =>
 {
@@ -36,82 +31,13 @@ builder.Services.AddScoped<EmployeeDbContext>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
 
-builder.Services.AddDbContext<AuthenticationDbContext>(options =>
-                options.UseSqlServer(builder.Configuration.GetConnectionString("EmployeesConnection")));
+builder.Services.ConfigAuthentication(builder.Configuration);
 
-builder.Services.AddDefaultIdentity<IdentityUser>()
-    .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<AuthenticationDbContext>()
-.AddDefaultTokenProviders();
-
-builder.Services.AddAuthentication(x =>
-{
-    x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
-    x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
-}).AddJwtBearer(x =>
-{
-    x.RequireHttpsMetadata = true;
-    x.SaveToken = true;
-    x.TokenValidationParameters = new TokenValidationParameters
-    {
-        ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["Jwt:SecurityKey"])),
-        ValidateIssuer = true,
-        ValidateAudience = true,
-        ValidAudience = builder.Configuration["Jwt:ValidAudience"],
-        ValidIssuer = builder.Configuration["Jwt:ValidIssuer"]
-    };
-});
-
-builder.Services.AddSwaggerGen(c =>
-{
-    c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
-    {
-        Description = "Inform the JWT like this: Bearer {your token}",
-        Name = "Authorization",
-        Scheme = "Bearer",
-        BearerFormat = "JWT",
-        In = ParameterLocation.Header,
-        Type = SecuritySchemeType.ApiKey
-    });
-
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "Bearer"
-                }
-            },
-            new string[] {}
-        }
-    });
-});
+builder.Services.ConfigSwagger();
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
-
-    var adminEmail = builder.Configuration["AdminUser:Email"] ?? string.Empty;
-    var adminPass = builder.Configuration["AdminUser:Password"] ?? string.Empty;
-
-    if (await userManager.FindByEmailAsync(adminEmail) == null)
-    {
-        var user = new IdentityUser
-        {
-            UserName = adminEmail,
-            Email = adminEmail,
-            EmailConfirmed = true
-        };
-
-        var result = await userManager.CreateAsync(user, adminPass);
-    }
-}
+await app.Services.SetupAdminUser(builder.Configuration);
 
 app.UseCors();
 
