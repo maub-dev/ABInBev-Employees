@@ -94,6 +94,26 @@ builder.Services.AddSwaggerGen(c =>
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    var userManager = scope.ServiceProvider.GetRequiredService<UserManager<IdentityUser>>();
+
+    var adminEmail = builder.Configuration["AdminUser:Email"] ?? string.Empty;
+    var adminPass = builder.Configuration["AdminUser:Password"] ?? string.Empty;
+
+    if (await userManager.FindByEmailAsync(adminEmail) == null)
+    {
+        var user = new IdentityUser
+        {
+            UserName = adminEmail,
+            Email = adminEmail,
+            EmailConfirmed = true
+        };
+
+        var result = await userManager.CreateAsync(user, adminPass);
+    }
+}
+
 app.UseCors();
 
 // Configure the HTTP request pipeline.
