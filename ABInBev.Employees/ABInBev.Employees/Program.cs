@@ -4,10 +4,10 @@ using ABInBev.Employees.Business.Services;
 using ABInBev.Employees.Data.Context;
 using ABInBev.Employees.Data.Repositories;
 using Microsoft.EntityFrameworkCore;
+using Serilog;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddCors(options =>
 {
     options.AddDefaultPolicy(builder =>
@@ -21,12 +21,14 @@ builder.Services.AddCors(options =>
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-//builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<EmployeeDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("EmployeesConnection"));
 });
+
+builder.Host.UseSerilog((context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
+
 builder.Services.AddScoped<EmployeeDbContext>();
 builder.Services.AddScoped<IEmployeeRepository, EmployeeRepository>();
 builder.Services.AddScoped<IEmployeeService, EmployeeService>();
