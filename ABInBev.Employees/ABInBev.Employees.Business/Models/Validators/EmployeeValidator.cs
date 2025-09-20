@@ -12,7 +12,9 @@ namespace ABInBev.Employees.Business.Models.Validators
             RuleFor(x => x.LastName).NotEmpty();
 
             RuleFor(x => x.Email).NotEmpty()
-                .EmailAddress(FluentValidation.Validators.EmailValidationMode.AspNetCoreCompatible);
+                .EmailAddress(FluentValidation.Validators.EmailValidationMode.AspNetCoreCompatible)
+                .MustAsync(async (email, dummy) => !(await employeeRepository.IsEmailInUseAsync(email, employeeId)))
+                    .WithMessage("This Email is already in use.");
 
             RuleFor(x => x.DocumentNumber).NotEmpty()
                 .MustAsync(async (documentNumber, dummy) => !(await employeeRepository.IsDocumentNumberInUseAsync(documentNumber, employeeId)))
@@ -24,7 +26,7 @@ namespace ABInBev.Employees.Business.Models.Validators
 
             RuleFor(x => x.Phone1).NotEmpty();
 
-            RuleFor(x => x.Phone2).NotEmpty();
+            RuleFor(x => x.Phone2).NotEmpty().NotEqual(x => x.Phone1);
         }
     }
 }

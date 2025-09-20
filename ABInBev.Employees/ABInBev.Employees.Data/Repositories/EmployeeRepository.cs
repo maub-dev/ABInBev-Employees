@@ -14,5 +14,13 @@ namespace ABInBev.Employees.Data.Repositories
 
             return await _dbSet.AnyAsync(x => x.DocumentNumber == documentNumber);
         }
+
+        public async Task<bool> IsEmailInUseAsync(string email, Guid? id)
+        {
+            if (id.HasValue)
+                return await _dbSet.AnyAsync(x => x.Email == email && x.Id != id);
+
+            return await _dbSet.AnyAsync(x => x.Email == email);
+        }
     }
 }

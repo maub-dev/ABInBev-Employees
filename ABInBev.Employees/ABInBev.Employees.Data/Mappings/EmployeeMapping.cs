@@ -12,6 +12,8 @@ namespace ABInBev.Employees.Data.Mappings
             builder.HasKey(x => x.Id);
             builder.HasIndex(x => x.DocumentNumber)
                 .IsUnique();
+            builder.HasIndex(x => x.Email)
+                .IsUnique();
 
             builder.Property(x => x.FirstName)
                 .IsRequired()

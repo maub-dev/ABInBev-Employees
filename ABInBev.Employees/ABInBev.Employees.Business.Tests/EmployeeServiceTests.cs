@@ -106,6 +106,30 @@ namespace ABInBev.Employees.Business.Tests
         }
 
         [Fact]
+        public async Task AddAsync_DuplicatedEmail_ThrowsException()
+        {
+            // Arrange
+            _userManagerMock
+                .Setup(x => x.CreateAsync(It.IsAny<IdentityUser>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Success);
+
+            _employeeRepoMock
+                .Setup(x => x.AddAsync(It.IsAny<Employee>()))
+                .Returns(Task.CompletedTask);
+
+            _employeeRepoMock
+                .Setup(x => x.IsDocumentNumberInUseAsync(It.IsAny<string>(), It.IsAny<Guid?>()))
+                .ReturnsAsync(() => false);
+
+            _employeeRepoMock
+                .Setup(x => x.IsEmailInUseAsync(It.IsAny<string>(), It.IsAny<Guid?>()))
+                .ReturnsAsync(() => true);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _service.AddAsync(_validEmployee, "Pa$$word1!"));
+        }
+
+        [Fact]
         public async Task AddAsync_Phone1Empty_ThrowsException()
         {
             // Arrange
@@ -127,6 +151,23 @@ namespace ABInBev.Employees.Business.Tests
         {
             // Arrange
             _validEmployee.Phone2 = string.Empty;
+            _userManagerMock
+                .Setup(x => x.CreateAsync(It.IsAny<IdentityUser>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Success);
+
+            _employeeRepoMock
+                .Setup(x => x.AddAsync(It.IsAny<Employee>()))
+                .Returns(Task.CompletedTask);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _service.AddAsync(_validEmployee, "Pa$$word1!"));
+        }
+
+        [Fact]
+        public async Task AddAsync_Phone1EqualsPhone2_ThrowsException()
+        {
+            // Arrange
+            _validEmployee.Phone2 = _validEmployee.Phone1;
             _userManagerMock
                 .Setup(x => x.CreateAsync(It.IsAny<IdentityUser>(), It.IsAny<string>()))
                 .ReturnsAsync(IdentityResult.Success);
