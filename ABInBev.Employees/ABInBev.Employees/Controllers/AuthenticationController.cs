@@ -13,11 +13,13 @@ namespace ABInBev.Employees.API.Controllers
     {
         private readonly SignInManager<IdentityUser> _signInManager;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IConfiguration _configuration;
 
-        public AuthenticationController(SignInManager<IdentityUser> signInManager, UserManager<IdentityUser> userManager)
+        public AuthenticationController(SignInManager<IdentityUser> signInManager, UserManager<IdentityUser> userManager, IConfiguration configuration)
         {
             _signInManager = signInManager;
             _userManager = userManager;
+            _configuration = configuration;
         }
 
         [HttpPost]
@@ -37,14 +39,14 @@ namespace ABInBev.Employees.API.Controllers
             return BadRequest("Invalid user or password.");
         }
 
-        private static string GerarJwt(string email)
+        private string GerarJwt(string email)
         {
             var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855");
+            var key = Encoding.ASCII.GetBytes(_configuration.GetSection("Jwt:SecurityKey").Value);
             var token = tokenHandler.CreateToken(new SecurityTokenDescriptor
             {
-                Issuer = "ABInBev",
-                Audience = "http://localhost",
+                Issuer = _configuration.GetSection("Jwt:ValidIssuer").Value,
+                Audience = _configuration.GetSection("Jwt:ValidAudience").Value,
                 Expires = DateTime.UtcNow.AddHours(4),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             });

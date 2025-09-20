@@ -55,11 +55,11 @@ builder.Services.AddAuthentication(x =>
     x.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuerSigningKey = true,
-        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")),
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(builder.Configuration["Jwt:SecurityKey"])),
         ValidateIssuer = true,
         ValidateAudience = true,
-        ValidAudience = "http://localhost",
-        ValidIssuer = "ABInBev"
+        ValidAudience = builder.Configuration["Jwt:ValidAudience"],
+        ValidIssuer = builder.Configuration["Jwt:ValidIssuer"]
     };
 });
 
