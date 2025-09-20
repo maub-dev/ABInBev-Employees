@@ -1,5 +1,4 @@
 ﻿using ABInBev.Employees.Business.Models;
-using ABInBev.Employees.Business.Models.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace ABInBev.Employees.API.DTOs
@@ -16,11 +15,8 @@ namespace ABInBev.Employees.API.DTOs
             LastName = employee.LastName;
             DocumentNumber = employee.DocumentNumber;
             Email = employee.Email;
-            Phonebook = employee.Phones?.Select(x => new PhonebookDTO
-            {
-                Phone = x.PhoneNumber,
-                Type = (int)x.Type
-            }).ToList() ?? [];
+            Phone1 = employee.Phone1;
+            Phone2 = employee.Phone2;
         }
 
         public Guid Id { get; set; }
@@ -37,8 +33,11 @@ namespace ABInBev.Employees.API.DTOs
         [Required]
         public string DocumentNumber { get; set; } = string.Empty;
 
-        //More than one
-        public List<PhonebookDTO> Phonebook { get; set; } = [];
+        [Required]
+        public string Phone1 { get; set; } = string.Empty;
+
+        [Required]
+        public string Phone2 { get; set; } = string.Empty;
 
         //You cannot create a user with higher permissions than the current one.In other words, an employee cannot create a leader, and a leader cannot create a director.
         //public Employee Manager { get; set; }
@@ -58,7 +57,8 @@ namespace ABInBev.Employees.API.DTOs
                 Email = Email,
                 DocumentNumber = DocumentNumber,
                 BirthDate = BirthDate,
-                Phones = Phonebook.Select(x => new Phonebook { Type = (PhoneType)x.Type, PhoneNumber = x.Phone }).ToList()
+                Phone1 = Phone1,
+                Phone2 = Phone2
             };
         }
     }

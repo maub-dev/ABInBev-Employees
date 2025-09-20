@@ -1,22 +1,14 @@
 ﻿using ABInBev.Employees.Business.Interfaces;
 using ABInBev.Employees.Business.Models;
-using ABInBev.Employees.Business.Models.Enums;
 using ABInBev.Employees.Business.Services;
 using Microsoft.AspNetCore.Identity;
 using Moq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ABInBev.Employees.Business.Tests
 {
     public class EmployeeServiceTests
     {
         private readonly Mock<IEmployeeRepository> _employeeRepoMock;
-        private readonly Mock<IPhonebookRepository> _phonebookRepoMock;
         private readonly Mock<UserManager<IdentityUser>> _userManagerMock;
         private readonly EmployeeService _service;
         private readonly Employee _validEmployee;
@@ -24,18 +16,13 @@ namespace ABInBev.Employees.Business.Tests
         public EmployeeServiceTests()
         {
             _employeeRepoMock = new Mock<IEmployeeRepository>();
-            _phonebookRepoMock = new Mock<IPhonebookRepository>();
 
             var userStoreMock = new Mock<IUserStore<IdentityUser>>();
             _userManagerMock = new Mock<UserManager<IdentityUser>>(
                 userStoreMock.Object, null, null, null, null, null, null, null, null
             );
 
-            _service = new EmployeeService(
-                _employeeRepoMock.Object,
-                _phonebookRepoMock.Object,
-                _userManagerMock.Object
-            );
+            _service = new EmployeeService(_employeeRepoMock.Object, _userManagerMock.Object);
 
             _validEmployee = new Employee
             {
@@ -44,11 +31,8 @@ namespace ABInBev.Employees.Business.Tests
                 Email = "john.doe@test.com",
                 DocumentNumber = "12345",
                 BirthDate = new DateOnly(1950, 01, 01),
-                Phones =
-                [
-                    new Phonebook { Type = PhoneType.Other, PhoneNumber = "12 999999999" },
-                    new Phonebook { Type = PhoneType.Mobile, PhoneNumber = "12 345678901" },
-                ]
+                Phone1 = "12 999999999",
+                Phone2 = "12 345678901"
             };
         }
 
@@ -122,13 +106,27 @@ namespace ABInBev.Employees.Business.Tests
         }
 
         [Fact]
-        public async Task AddAsync_LessThanTwoPhones_ThrowsException()
+        public async Task AddAsync_Phone1Empty_ThrowsException()
         {
             // Arrange
-            _validEmployee.Phones =
-            [
-                new Phonebook {Type = PhoneType.Other, PhoneNumber = "44444"}
-            ];
+            _validEmployee.Phone1 = string.Empty;
+            _userManagerMock
+                .Setup(x => x.CreateAsync(It.IsAny<IdentityUser>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Success);
+
+            _employeeRepoMock
+                .Setup(x => x.AddAsync(It.IsAny<Employee>()))
+                .Returns(Task.CompletedTask);
+
+            // Act & Assert
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _service.AddAsync(_validEmployee, "Pa$$word1!"));
+        }
+
+        [Fact]
+        public async Task AddAsync_Phone2Empty_ThrowsException()
+        {
+            // Arrange
+            _validEmployee.Phone2 = string.Empty;
             _userManagerMock
                 .Setup(x => x.CreateAsync(It.IsAny<IdentityUser>(), It.IsAny<string>()))
                 .ReturnsAsync(IdentityResult.Success);
@@ -164,16 +162,12 @@ namespace ABInBev.Employees.Business.Tests
             // Arrange
             _employeeRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(_validEmployee);
             _employeeRepoMock.Setup(x => x.UpdateAsync(It.IsAny<Employee>())).Returns(Task.CompletedTask);
-            _phonebookRepoMock.Setup(x => x.RemoveAllPhonesFromEmployeeAsync(It.IsAny<Guid>())).Returns(Task.CompletedTask);
-            _phonebookRepoMock.Setup(x => x.AddRangeAsync(It.IsAny<IEnumerable<Phonebook>>())).Returns(Task.CompletedTask);
 
             // Act
             await _service.UpdateAsync(_validEmployee);
 
             // Assert
             _employeeRepoMock.Verify(x => x.UpdateAsync(It.Is<Employee>(e => e.FirstName == _validEmployee.FirstName)), Times.Once);
-            _phonebookRepoMock.Verify(x => x.RemoveAllPhonesFromEmployeeAsync(It.IsAny<Guid>()), Times.Once);
-            _phonebookRepoMock.Verify(x => x.AddRangeAsync(It.Is<IEnumerable<Phonebook>>(p => p.Any())), Times.Once);
         }
 
         [Fact]
@@ -195,7 +189,7 @@ namespace ABInBev.Employees.Business.Tests
             var employee = new Employee { Id = Guid.NewGuid(), UserIdentityId = "123" };
             var identityUser = new IdentityUser { Id = employee.UserIdentityId };
 
-            _employeeRepoMock.Setup(x => x.GetByIdWithIncludesAsync(employee.Id)).ReturnsAsync(employee);
+            _employeeRepoMock.Setup(x => x.GetByIdAsync(employee.Id)).ReturnsAsync(employee);
             _employeeRepoMock.Setup(x => x.DeleteAsync(employee.Id)).Returns(Task.CompletedTask);
 
             _userManagerMock.Setup(x => x.FindByIdAsync(employee.UserIdentityId)).ReturnsAsync(identityUser);
@@ -223,20 +217,6 @@ namespace ABInBev.Employees.Business.Tests
             Assert.Single(result);
             Assert.Same(employees, result);
             _employeeRepoMock.Verify(x => x.GetAllAsync(), Times.Once);
-        }
-
-        [Fact]
-        public async Task GetByIdAsync_Valid_ReturnsEmployeeWithPhonebookPopulated()
-        {
-            // Arrange
-            _employeeRepoMock.Setup(x => x.GetByIdWithIncludesAsync(_validEmployee.Id)).ReturnsAsync(_validEmployee);
-
-            // Act
-            var result = await _service.GetByIdAsync(_validEmployee.Id);
-
-            // Assert
-            Assert.Equal(_validEmployee.Id, result?.Id);
-            Assert.NotEmpty(result?.Phones);
         }
     }
 }

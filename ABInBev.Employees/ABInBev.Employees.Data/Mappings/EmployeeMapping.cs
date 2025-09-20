@@ -26,6 +26,7 @@ namespace ABInBev.Employees.Data.Mappings
                 .HasColumnType("varchar(50)");
 
             builder.Property(x => x.DocumentNumber)
+                .IsRequired()
                 .HasColumnType("varchar(30)");
 
             builder.Property(x => x.UserIdentityId)
@@ -36,9 +37,13 @@ namespace ABInBev.Employees.Data.Mappings
                 .IsRequired()
                 .HasColumnType("date");
 
-            builder.HasMany(x => x.Phones)
-                .WithOne(p => p.Employee)
-                .HasForeignKey(p => p.EmployeeId);
+            builder.Property(x => x.Phone1)
+                .IsRequired()
+                .HasColumnType("varchar(30)");
+
+            builder.Property(x => x.Phone2)
+                .IsRequired()
+                .HasColumnType("varchar(30)");
         }
     }
 }

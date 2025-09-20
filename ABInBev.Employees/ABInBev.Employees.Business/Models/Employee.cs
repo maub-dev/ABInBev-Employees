@@ -21,8 +21,11 @@ namespace ABInBev.Employees.Business.Models
         //Must validate that the person is not a minor.
         public DateOnly BirthDate { get; set; }
 
-        [MinLength(2)]
-        public List<Phonebook> Phones { get; set; }
+        [Required]
+        public string Phone1 { get; set; }
+
+        [Required]
+        public string Phone2 { get; set; }
         //You cannot create a user with higher permissions than the current one.In other words, an employee cannot create a leader, and a leader cannot create a director.
         //public Employee? Manager { get; set; }
     }

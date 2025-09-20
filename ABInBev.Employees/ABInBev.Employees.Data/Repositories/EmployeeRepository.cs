@@ -7,11 +7,6 @@ namespace ABInBev.Employees.Data.Repositories
 {
     public class EmployeeRepository(EmployeeDbContext dbContext) : Repository<Employee>(dbContext), IEmployeeRepository
     {
-        public async Task<Employee?> GetByIdWithIncludesAsync(Guid id)
-        {
-            return await _dbSet.Include(x => x.Phones).FirstOrDefaultAsync(x => x.Id == id);
-        }
-
         public async Task<bool> IsDocumentNumberInUseAsync(string documentNumber, Guid? id)
         {
             if (id.HasValue)

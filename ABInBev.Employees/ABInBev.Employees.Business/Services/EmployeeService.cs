@@ -8,22 +8,16 @@ namespace ABInBev.Employees.Business.Services
     public class EmployeeService : IEmployeeService
     {
         private readonly IEmployeeRepository _repository;
-        private readonly IPhonebookRepository _phonebookRepository;
         private readonly UserManager<IdentityUser> _userManager;
 
-        public EmployeeService(IEmployeeRepository repository, IPhonebookRepository phonebookRepository, UserManager<IdentityUser> userManager)
+        public EmployeeService(IEmployeeRepository repository, UserManager<IdentityUser> userManager)
         {
             _repository = repository;
-            _phonebookRepository = phonebookRepository;
             _userManager = userManager;
         }
 
         public async Task AddAsync(Employee employee, string password)
         {
-            foreach (var phone in employee.Phones)
-            {
-                phone.Employee = employee;
-            }
             await ValidatorHelper.ValidateAsync(new EmployeeValidator(_repository, null), employee);
 
             var user = new IdentityUser
@@ -58,15 +52,10 @@ namespace ABInBev.Employees.Business.Services
             employeeDb.Email = employeeDb.Email;
             employeeDb.FirstName = employee.FirstName;
             employeeDb.LastName = employee.LastName;
+            employeeDb.Phone1 = employee.Phone1;
+            employeeDb.Phone2 = employee.Phone2;
 
             await _repository.UpdateAsync(employeeDb);
-
-            await _phonebookRepository.RemoveAllPhonesFromEmployeeAsync(employeeDb.Id);
-            foreach (var phone in employee.Phones)
-            {
-                phone.EmployeeId = employeeDb.Id;
-            }
-            await _phonebookRepository.AddRangeAsync(employee.Phones);
         }
 
         public async Task DeleteAsync(Guid id)
@@ -88,7 +77,7 @@ namespace ABInBev.Employees.Business.Services
 
         public async Task<Employee?> GetByIdAsync(Guid id)
         {
-            return await _repository.GetByIdWithIncludesAsync(id);
+            return await _repository.GetByIdAsync(id);
         }
     }
 }

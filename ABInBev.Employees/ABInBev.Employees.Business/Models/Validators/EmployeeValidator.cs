@@ -22,8 +22,9 @@ namespace ABInBev.Employees.Business.Models.Validators
                 .Must(x => x.Year <= DateTime.Now.AddYears(-18).Year)
                 .WithMessage("The Employee must have at least 18 years old.");
 
-            RuleFor(x => x.Phones).NotEmpty()
-                .Must(x => x is not null && x.Count > 1).WithMessage("At least 2 phones are required.");
+            RuleFor(x => x.Phone1).NotEmpty();
+
+            RuleFor(x => x.Phone2).NotEmpty();
         }
     }
 }

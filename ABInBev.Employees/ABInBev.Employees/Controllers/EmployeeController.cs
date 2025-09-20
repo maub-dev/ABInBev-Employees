@@ -1,6 +1,5 @@
 ﻿using ABInBev.Employees.API.DTOs;
 using ABInBev.Employees.Business.Interfaces;
-using ABInBev.Employees.Business.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
