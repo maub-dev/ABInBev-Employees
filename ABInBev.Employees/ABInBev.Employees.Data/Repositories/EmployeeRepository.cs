@@ -22,5 +22,10 @@ namespace ABInBev.Employees.Data.Repositories
 
             return await _dbSet.AnyAsync(x => x.Email == email);
         }
+
+        public async Task<Employee?> GetByEmailAsync(string email)
+        {
+            return await _dbSet.FirstOrDefaultAsync(x => x.Email == email);
+        }
     }
 }

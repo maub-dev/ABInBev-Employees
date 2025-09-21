@@ -2,6 +2,7 @@
 using ABInBev.Employees.Business.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace ABInBev.Employees.API.Controllers
 {
@@ -38,7 +39,8 @@ namespace ABInBev.Employees.API.Controllers
         [HttpPost(Name = "AddEmployee")]
         public async Task<ActionResult> Post(EmployeeDTO employee)
         {
-            await _employeeService.AddAsync(employee.ToEmployee(), employee.Password);
+            var emailAuthenticatedUser = HttpContext.User.FindFirstValue(ClaimTypes.Email);
+            await _employeeService.AddAsync(employee.ToEmployee(), employee.Password, emailAuthenticatedUser);
 
             return Ok();
         }
@@ -46,7 +48,8 @@ namespace ABInBev.Employees.API.Controllers
         [HttpPut(Name = "UpdateEmployee")]
         public async Task<ActionResult> Put(EmployeeDTO employee)
         {
-            await _employeeService.UpdateAsync(employee.ToEmployee());
+            var emailAuthenticatedUser = HttpContext.User.FindFirstValue(ClaimTypes.Email);
+            await _employeeService.UpdateAsync(employee.ToEmployee(), emailAuthenticatedUser);
 
             return Ok();
         }
@@ -54,7 +57,8 @@ namespace ABInBev.Employees.API.Controllers
         [HttpDelete(Name = "DeleteEmployee")]
         public async Task<ActionResult> Delete(Guid id)
         {
-            await _employeeService.DeleteAsync(id);
+            var emailAuthenticatedUser = HttpContext.User.FindFirstValue(ClaimTypes.Email);
+            await _employeeService.DeleteAsync(id, emailAuthenticatedUser);
 
             return Ok();
         }

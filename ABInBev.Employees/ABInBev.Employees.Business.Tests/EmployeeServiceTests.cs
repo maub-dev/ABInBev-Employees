@@ -1,5 +1,6 @@
 ﻿using ABInBev.Employees.Business.Interfaces;
 using ABInBev.Employees.Business.Models;
+using ABInBev.Employees.Business.Models.Enums;
 using ABInBev.Employees.Business.Services;
 using Microsoft.AspNetCore.Identity;
 using Moq;
@@ -32,7 +33,8 @@ namespace ABInBev.Employees.Business.Tests
                 DocumentNumber = "12345",
                 BirthDate = new DateOnly(1950, 01, 01),
                 Phone1 = "12 999999999",
-                Phone2 = "12 345678901"
+                Phone2 = "12 345678901",
+                Role = EmployeeRoleEnum.Admin
             };
         }
 
@@ -45,11 +47,15 @@ namespace ABInBev.Employees.Business.Tests
                 .ReturnsAsync(IdentityResult.Success);
 
             _employeeRepoMock
+                .Setup(x => x.GetByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync(_validEmployee);
+
+            _employeeRepoMock
                 .Setup(x => x.AddAsync(It.IsAny<Employee>()))
                 .Returns(Task.CompletedTask);
 
             // Act
-            await _service.AddAsync(_validEmployee, "Password123!");
+            await _service.AddAsync(_validEmployee, "Password123!", string.Empty);
 
             // Assert
             _employeeRepoMock.Verify(x => x.AddAsync(It.Is<Employee>(e => e.Email == _validEmployee.Email)), Times.Once);
@@ -60,12 +66,16 @@ namespace ABInBev.Employees.Business.Tests
         public async Task AddAsync_IdentityCreationFails_ThrowsException()
         {
             // Arrange
+            _employeeRepoMock
+                .Setup(x => x.GetByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync(_validEmployee);
+
             _userManagerMock
                 .Setup(x => x.CreateAsync(It.IsAny<IdentityUser>(), It.IsAny<string>()))
                 .ReturnsAsync(IdentityResult.Failed(new IdentityError { Code = "Error", Description = "Invalid Password" }));
 
             // Act & Assert
-            await Assert.ThrowsAsync<InvalidOperationException>(() => _service.AddAsync(_validEmployee, "pass"));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _service.AddAsync(_validEmployee, "pass", string.Empty));
         }
 
         [Fact]
@@ -78,11 +88,15 @@ namespace ABInBev.Employees.Business.Tests
                 .ReturnsAsync(IdentityResult.Success);
 
             _employeeRepoMock
+                .Setup(x => x.GetByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync(_validEmployee);
+
+            _employeeRepoMock
                 .Setup(x => x.AddAsync(It.IsAny<Employee>()))
                 .Returns(Task.CompletedTask);
 
             // Act & Assert
-            await Assert.ThrowsAsync<InvalidOperationException>(() => _service.AddAsync(_validEmployee, "Pa$$word1!"));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _service.AddAsync(_validEmployee, "Pa$$word1!", string.Empty));
         }
 
         [Fact]
@@ -94,6 +108,10 @@ namespace ABInBev.Employees.Business.Tests
                 .ReturnsAsync(IdentityResult.Success);
 
             _employeeRepoMock
+                .Setup(x => x.GetByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync(_validEmployee);
+
+            _employeeRepoMock
                 .Setup(x => x.AddAsync(It.IsAny<Employee>()))
                 .Returns(Task.CompletedTask);
 
@@ -102,7 +120,7 @@ namespace ABInBev.Employees.Business.Tests
                 .ReturnsAsync(() => true);
 
             // Act & Assert
-            await Assert.ThrowsAsync<InvalidOperationException>(() => _service.AddAsync(_validEmployee, "Pa$$word1!"));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _service.AddAsync(_validEmployee, "Pa$$word1!", string.Empty));
         }
 
         [Fact]
@@ -112,6 +130,10 @@ namespace ABInBev.Employees.Business.Tests
             _userManagerMock
                 .Setup(x => x.CreateAsync(It.IsAny<IdentityUser>(), It.IsAny<string>()))
                 .ReturnsAsync(IdentityResult.Success);
+
+            _employeeRepoMock
+                .Setup(x => x.GetByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync(_validEmployee);
 
             _employeeRepoMock
                 .Setup(x => x.AddAsync(It.IsAny<Employee>()))
@@ -126,7 +148,7 @@ namespace ABInBev.Employees.Business.Tests
                 .ReturnsAsync(() => true);
 
             // Act & Assert
-            await Assert.ThrowsAsync<InvalidOperationException>(() => _service.AddAsync(_validEmployee, "Pa$$word1!"));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _service.AddAsync(_validEmployee, "Pa$$word1!", string.Empty));
         }
 
         [Fact]
@@ -139,11 +161,15 @@ namespace ABInBev.Employees.Business.Tests
                 .ReturnsAsync(IdentityResult.Success);
 
             _employeeRepoMock
+                .Setup(x => x.GetByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync(_validEmployee);
+
+            _employeeRepoMock
                 .Setup(x => x.AddAsync(It.IsAny<Employee>()))
                 .Returns(Task.CompletedTask);
 
             // Act & Assert
-            await Assert.ThrowsAsync<InvalidOperationException>(() => _service.AddAsync(_validEmployee, "Pa$$word1!"));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _service.AddAsync(_validEmployee, "Pa$$word1!", string.Empty));
         }
 
         [Fact]
@@ -156,11 +182,15 @@ namespace ABInBev.Employees.Business.Tests
                 .ReturnsAsync(IdentityResult.Success);
 
             _employeeRepoMock
+                .Setup(x => x.GetByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync(_validEmployee);
+
+            _employeeRepoMock
                 .Setup(x => x.AddAsync(It.IsAny<Employee>()))
                 .Returns(Task.CompletedTask);
 
             // Act & Assert
-            await Assert.ThrowsAsync<InvalidOperationException>(() => _service.AddAsync(_validEmployee, "Pa$$word1!"));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _service.AddAsync(_validEmployee, "Pa$$word1!", string.Empty));
         }
 
         [Fact]
@@ -173,11 +203,15 @@ namespace ABInBev.Employees.Business.Tests
                 .ReturnsAsync(IdentityResult.Success);
 
             _employeeRepoMock
+                .Setup(x => x.GetByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync(_validEmployee);
+
+            _employeeRepoMock
                 .Setup(x => x.AddAsync(It.IsAny<Employee>()))
                 .Returns(Task.CompletedTask);
 
             // Act & Assert
-            await Assert.ThrowsAsync<InvalidOperationException>(() => _service.AddAsync(_validEmployee, "Pa$$word1!"));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _service.AddAsync(_validEmployee, "Pa$$word1!", string.Empty));
         }
 
         [Fact]
@@ -190,11 +224,15 @@ namespace ABInBev.Employees.Business.Tests
                 .ReturnsAsync(IdentityResult.Success);
 
             _employeeRepoMock
+                .Setup(x => x.GetByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync(_validEmployee);
+
+            _employeeRepoMock
                 .Setup(x => x.AddAsync(It.IsAny<Employee>()))
                 .Returns(Task.CompletedTask);
 
             // Act & Assert
-            await Assert.ThrowsAsync<InvalidOperationException>(() => _service.AddAsync(_validEmployee, "Pa$$word1!"));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _service.AddAsync(_validEmployee, "Pa$$word1!", string.Empty));
         }
 
         [Fact]
@@ -203,9 +241,12 @@ namespace ABInBev.Employees.Business.Tests
             // Arrange
             _employeeRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(_validEmployee);
             _employeeRepoMock.Setup(x => x.UpdateAsync(It.IsAny<Employee>())).Returns(Task.CompletedTask);
+            _employeeRepoMock
+                .Setup(x => x.GetByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync(_validEmployee);
 
             // Act
-            await _service.UpdateAsync(_validEmployee);
+            await _service.UpdateAsync(_validEmployee, string.Empty);
 
             // Assert
             _employeeRepoMock.Verify(x => x.UpdateAsync(It.Is<Employee>(e => e.FirstName == _validEmployee.FirstName)), Times.Once);
@@ -218,9 +259,12 @@ namespace ABInBev.Employees.Business.Tests
             Employee? employee = null;
 
             _employeeRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(employee);
+            _employeeRepoMock
+                .Setup(x => x.GetByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync(_validEmployee);
 
             // Act & Assert
-            await Assert.ThrowsAsync<InvalidOperationException>(() => _service.UpdateAsync(_validEmployee));
+            await Assert.ThrowsAsync<InvalidOperationException>(() => _service.UpdateAsync(_validEmployee, string.Empty));
         }
 
         [Fact]
@@ -232,12 +276,15 @@ namespace ABInBev.Employees.Business.Tests
 
             _employeeRepoMock.Setup(x => x.GetByIdAsync(employee.Id)).ReturnsAsync(employee);
             _employeeRepoMock.Setup(x => x.DeleteAsync(employee.Id)).Returns(Task.CompletedTask);
+            _employeeRepoMock
+                .Setup(x => x.GetByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync(_validEmployee);
 
             _userManagerMock.Setup(x => x.FindByIdAsync(employee.UserIdentityId)).ReturnsAsync(identityUser);
             _userManagerMock.Setup(x => x.DeleteAsync(identityUser)).ReturnsAsync(IdentityResult.Success);
 
             // Act
-            await _service.DeleteAsync(employee.Id);
+            await _service.DeleteAsync(employee.Id, string.Empty);
 
             // Assert
             _employeeRepoMock.Verify(x => x.DeleteAsync(employee.Id), Times.Once);

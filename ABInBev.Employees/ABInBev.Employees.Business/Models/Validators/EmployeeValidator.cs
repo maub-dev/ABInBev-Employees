@@ -27,6 +27,8 @@ namespace ABInBev.Employees.Business.Models.Validators
             RuleFor(x => x.Phone1).NotEmpty();
 
             RuleFor(x => x.Phone2).NotEmpty().NotEqual(x => x.Phone1);
+
+            RuleFor(x => x.Role).NotNull();
         }
     }
 }

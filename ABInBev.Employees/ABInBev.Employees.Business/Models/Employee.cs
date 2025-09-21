@@ -34,5 +34,18 @@ namespace ABInBev.Employees.Business.Models
         public Employee? Manager { get; set; }
         //You cannot create a user with higher permissions than the current one.In other words, an employee cannot create a leader, and a leader cannot create a director.
         //public Employee? Manager { get; set; }
+
+        public bool CanUseRole(EmployeeRoleEnum role)
+        {
+            var rolePermissions = new Dictionary<EmployeeRoleEnum, EmployeeRoleEnum[]>
+            {
+                { EmployeeRoleEnum.Employee, [EmployeeRoleEnum.Employee] },
+                { EmployeeRoleEnum.Leader, [EmployeeRoleEnum.Employee, EmployeeRoleEnum.Leader] },
+                { EmployeeRoleEnum.Director, [EmployeeRoleEnum.Employee, EmployeeRoleEnum.Leader, EmployeeRoleEnum.Director] },
+                { EmployeeRoleEnum.Admin, [EmployeeRoleEnum.Employee, EmployeeRoleEnum.Leader, EmployeeRoleEnum.Director, EmployeeRoleEnum.Admin] }
+            };
+
+            return rolePermissions[Role].Contains(role);
+        }
     }
 }

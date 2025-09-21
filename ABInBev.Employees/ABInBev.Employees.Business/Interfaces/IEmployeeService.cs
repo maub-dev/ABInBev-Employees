@@ -6,8 +6,9 @@ namespace ABInBev.Employees.Business.Interfaces
     {
         Task<IEnumerable<Employee>> GetAllAsync();
         Task<Employee?> GetByIdAsync(Guid id);
-        Task AddAsync(Employee employee, string password);
-        Task UpdateAsync(Employee employee);
-        Task DeleteAsync(Guid id);
+        Task<Employee?> GetByEmailAsync(string email);
+        Task AddAsync(Employee employee, string password, string emailAuthenticatedUser);
+        Task UpdateAsync(Employee employee, string emailAuthenticatedUser);
+        Task DeleteAsync(Guid id, string emailAuthenticatedUser);
     }
 }

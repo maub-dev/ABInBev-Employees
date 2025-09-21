@@ -19,7 +19,7 @@ namespace ABInBev.Employees.API.DTOs
             Phone1 = employee.Phone1;
             Phone2 = employee.Phone2;
             Role = (int)employee.Role;
-            ManagerId = employee.ManagerId;
+            ManagerId = employee.ManagerId?.ToString();
         }
 
         public Guid Id { get; set; }
@@ -51,11 +51,11 @@ namespace ABInBev.Employees.API.DTOs
         public DateOnly BirthDate { get; set; }
 
         public int Role { get; set; }
-        public Guid? ManagerId { get; set; }
+        public string? ManagerId { get; set; }
 
         public Employee ToEmployee()
         {
-            return new Employee
+            var employee = new Employee
             {
                 Id = Id,
                 FirstName = FirstName,
@@ -65,9 +65,13 @@ namespace ABInBev.Employees.API.DTOs
                 BirthDate = BirthDate,
                 Phone1 = Phone1,
                 Phone2 = Phone2,
-                Role = (EmployeeRoleEnum)Role,
-                ManagerId = ManagerId
+                Role = (EmployeeRoleEnum)Role
             };
+
+            if (!string.IsNullOrEmpty(ManagerId))
+                employee.ManagerId = new Guid(ManagerId);
+
+            return employee;
         }
     }
 }
