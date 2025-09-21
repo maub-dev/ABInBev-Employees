@@ -46,6 +46,15 @@ namespace ABInBev.Employees.Data.Mappings
             builder.Property(x => x.Phone2)
                 .IsRequired()
                 .HasColumnType("varchar(30)");
+
+            builder.Property(x => x.Role)
+                .IsRequired()
+                .HasColumnType("int");
+
+            builder.HasOne(e => e.Manager)
+                .WithMany()
+                .HasForeignKey(e => e.ManagerId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

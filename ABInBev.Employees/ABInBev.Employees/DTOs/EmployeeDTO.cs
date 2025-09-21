@@ -1,4 +1,5 @@
 ﻿using ABInBev.Employees.Business.Models;
+using ABInBev.Employees.Business.Models.Enums;
 using System.ComponentModel.DataAnnotations;
 
 namespace ABInBev.Employees.API.DTOs
@@ -17,6 +18,8 @@ namespace ABInBev.Employees.API.DTOs
             Email = employee.Email;
             Phone1 = employee.Phone1;
             Phone2 = employee.Phone2;
+            Role = (int)employee.Role;
+            ManagerId = employee.ManagerId;
         }
 
         public Guid Id { get; set; }
@@ -47,6 +50,9 @@ namespace ABInBev.Employees.API.DTOs
         //Must validate that the person is not a minor.
         public DateOnly BirthDate { get; set; }
 
+        public int Role { get; set; }
+        public Guid? ManagerId { get; set; }
+
         public Employee ToEmployee()
         {
             return new Employee
@@ -58,7 +64,9 @@ namespace ABInBev.Employees.API.DTOs
                 DocumentNumber = DocumentNumber,
                 BirthDate = BirthDate,
                 Phone1 = Phone1,
-                Phone2 = Phone2
+                Phone2 = Phone2,
+                Role = (EmployeeRoleEnum)Role,
+                ManagerId = ManagerId
             };
         }
     }

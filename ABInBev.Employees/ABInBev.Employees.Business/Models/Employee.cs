@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using ABInBev.Employees.Business.Models.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace ABInBev.Employees.Business.Models
 {
@@ -26,6 +27,11 @@ namespace ABInBev.Employees.Business.Models
 
         [Required]
         public string Phone2 { get; set; }
+
+        public EmployeeRoleEnum Role { get; set; }
+
+        public Guid? ManagerId { get; set; }
+        public Employee? Manager { get; set; }
         //You cannot create a user with higher permissions than the current one.In other words, an employee cannot create a leader, and a leader cannot create a director.
         //public Employee? Manager { get; set; }
     }

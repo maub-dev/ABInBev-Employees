@@ -44,8 +44,6 @@ using (var scope = app.Services.CreateScope())
     var db = scope.ServiceProvider.GetRequiredService<EmployeeDbContext>();
     db.Database.EnsureCreated();
 
-    //db.Database.Migrate();
-
     var authDb = scope.ServiceProvider.GetRequiredService<AuthenticationDbContext>();
     authDb.Database.Migrate();
 }
