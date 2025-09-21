@@ -1,0 +1,32 @@
+services:
+  abinbev.employees.api:
+    image: ${DOCKER_REGISTRY-}abinbevemployeesapi
+    build:
+      context: .
+      dockerfile: ABInBev.Employees/Dockerfile
+    depends_on: 
+      abinbev.employees.db:
+        condition: service_healthy
+      seq_log:
+        condition: service_started
+  abinbev.employees.db:
+    image: "mcr.microsoft.com/mssql/server:2022-latest"
+    environment:
+      - MSSQL_SA_PASSWORD=Passw0rd1!
+      - ACCEPT_EULA=Y
+    restart: unless-stopped
+    ports:
+      - "5435:1433"
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P Passw0rd1! -Q 'SELECT 1'"]
+      interval: 10s
+      retries: 10
+      start_period: 30s
+  seq_log:
+    image: "datalust/seq"
+    environment:
+      - SEQ_PASSWORD=Passw0rd1!
+      - ACCEPT_EULA=Y
+    restart: unless-stopped
+    ports:
+      - "5342:80"
