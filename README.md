@@ -1,5 +1,5 @@
 # ABInBev-Employees
-This is a project to manage employees for AB InBev company.
+This is the API to manage employees for AB InBev company.
 
 # Requirements
 To run this application is required that you have Docker installed and running on your machine.
