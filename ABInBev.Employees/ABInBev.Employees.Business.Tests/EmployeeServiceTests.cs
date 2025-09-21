@@ -35,7 +35,8 @@ namespace ABInBev.Employees.Business.Tests
                 BirthDate = new DateOnly(1950, 01, 01),
                 Phone1 = "12 999999999",
                 Phone2 = "12 345678901",
-                Role = EmployeeRoleEnum.Admin
+                Role = EmployeeRoleEnum.Admin,
+                UserIdentityId = Guid.NewGuid().ToString()
             };
         }
 
@@ -245,6 +246,77 @@ namespace ABInBev.Employees.Business.Tests
             Assert.Contains("The Employee must have at least 18 years old", exception.Message);
         }
 
+        [Theory]
+        [InlineData(EmployeeRoleEnum.Employee, EmployeeRoleEnum.Employee)]
+        [InlineData(EmployeeRoleEnum.Leader, EmployeeRoleEnum.Employee)]
+        [InlineData(EmployeeRoleEnum.Leader, EmployeeRoleEnum.Leader)]
+        [InlineData(EmployeeRoleEnum.Director, EmployeeRoleEnum.Employee)]
+        [InlineData(EmployeeRoleEnum.Director, EmployeeRoleEnum.Leader)]
+        [InlineData(EmployeeRoleEnum.Director, EmployeeRoleEnum.Director)]
+        [InlineData(EmployeeRoleEnum.Admin, EmployeeRoleEnum.Employee)]
+        [InlineData(EmployeeRoleEnum.Admin, EmployeeRoleEnum.Leader)]
+        [InlineData(EmployeeRoleEnum.Admin, EmployeeRoleEnum.Director)]
+        [InlineData(EmployeeRoleEnum.Admin, EmployeeRoleEnum.Admin)]
+        public async Task AddAsync_ValidateRolePermissions_Success(EmployeeRoleEnum authUserRole, EmployeeRoleEnum userRole)
+        {
+            // Arrange
+            _validEmployee.Role = userRole;
+            _userManagerMock
+                .Setup(x => x.CreateAsync(It.IsAny<IdentityUser>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Success);
+
+            _employeeRepoMock
+                .Setup(x => x.GetByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync(_validEmployee);
+
+            _employeeRepoMock
+                .Setup(x => x.AddAsync(It.IsAny<Employee>()))
+                .Returns(Task.CompletedTask);
+
+            var authEmployee = new Employee { Role = authUserRole };
+
+            _employeeRepoMock.Setup(x => x.GetByEmailAsync(It.IsAny<string>())).ReturnsAsync(authEmployee);
+
+            // Act
+            await _service.AddAsync(_validEmployee, "Password123!", string.Empty);
+
+            // Assert
+            _employeeRepoMock.Verify(x => x.AddAsync(It.Is<Employee>(e => e.Email == _validEmployee.Email)), Times.Once);
+            _userManagerMock.Verify(x => x.CreateAsync(It.IsAny<IdentityUser>(), "Password123!"), Times.Once);
+        }
+
+        [Theory]
+        [InlineData(EmployeeRoleEnum.Employee, EmployeeRoleEnum.Leader)]
+        [InlineData(EmployeeRoleEnum.Employee, EmployeeRoleEnum.Director)]
+        [InlineData(EmployeeRoleEnum.Employee, EmployeeRoleEnum.Admin)]
+        [InlineData(EmployeeRoleEnum.Leader, EmployeeRoleEnum.Director)]
+        [InlineData(EmployeeRoleEnum.Leader, EmployeeRoleEnum.Admin)]
+        [InlineData(EmployeeRoleEnum.Director, EmployeeRoleEnum.Admin)]
+        public async Task AddAsync_ValidateRolePermissions_ThrowsException(EmployeeRoleEnum authUserRole, EmployeeRoleEnum userRole)
+        {
+            // Arrange
+            _validEmployee.Role = userRole;
+            _userManagerMock
+                .Setup(x => x.CreateAsync(It.IsAny<IdentityUser>(), It.IsAny<string>()))
+                .ReturnsAsync(IdentityResult.Success);
+
+            _employeeRepoMock
+                .Setup(x => x.GetByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync(_validEmployee);
+
+            _employeeRepoMock
+                .Setup(x => x.AddAsync(It.IsAny<Employee>()))
+                .Returns(Task.CompletedTask);
+
+            var authEmployee = new Employee { Role = authUserRole };
+
+            _employeeRepoMock.Setup(x => x.GetByEmailAsync(It.IsAny<string>())) .ReturnsAsync(authEmployee);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _service.AddAsync(_validEmployee, "Pa$$word1!", string.Empty));
+            Assert.Contains($"You are not allowed to create employees with role {userRole}", exception.Message);
+        }
+
         [Fact]
         public async Task UpdateAsync_ValidEmployee_UpdateEmployee()
         {
@@ -278,6 +350,72 @@ namespace ABInBev.Employees.Business.Tests
             Assert.Contains($"The Employee {_validEmployee.Id} was not found.", exception.Message);
         }
 
+        [Theory]
+        [InlineData(EmployeeRoleEnum.Employee, EmployeeRoleEnum.Leader)]
+        [InlineData(EmployeeRoleEnum.Employee, EmployeeRoleEnum.Director)]
+        [InlineData(EmployeeRoleEnum.Employee, EmployeeRoleEnum.Admin)]
+        [InlineData(EmployeeRoleEnum.Leader, EmployeeRoleEnum.Director)]
+        [InlineData(EmployeeRoleEnum.Leader, EmployeeRoleEnum.Admin)]
+        [InlineData(EmployeeRoleEnum.Director, EmployeeRoleEnum.Admin)]
+        public async Task UpdateAsync_ValidateRolePermissions_ThrowsException(EmployeeRoleEnum authUserRole, EmployeeRoleEnum userRole)
+        {
+            // Arrange
+            _validEmployee.Role = userRole;
+            _employeeRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(_validEmployee);
+
+            _employeeRepoMock
+                .Setup(x => x.GetByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync(_validEmployee);
+
+            _employeeRepoMock
+                .Setup(x => x.UpdateAsync(It.IsAny<Employee>()))
+                .Returns(Task.CompletedTask);
+
+            var authEmployee = new Employee { Role = authUserRole };
+
+            _employeeRepoMock.Setup(x => x.GetByEmailAsync(It.IsAny<string>())).ReturnsAsync(authEmployee);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _service.UpdateAsync(_validEmployee, string.Empty));
+            Assert.Contains($"You are not allowed to edit employees with role {userRole}", exception.Message);
+        }
+
+        [Theory]
+        [InlineData(EmployeeRoleEnum.Employee, EmployeeRoleEnum.Employee)]
+        [InlineData(EmployeeRoleEnum.Leader, EmployeeRoleEnum.Employee)]
+        [InlineData(EmployeeRoleEnum.Leader, EmployeeRoleEnum.Leader)]
+        [InlineData(EmployeeRoleEnum.Director, EmployeeRoleEnum.Employee)]
+        [InlineData(EmployeeRoleEnum.Director, EmployeeRoleEnum.Leader)]
+        [InlineData(EmployeeRoleEnum.Director, EmployeeRoleEnum.Director)]
+        [InlineData(EmployeeRoleEnum.Admin, EmployeeRoleEnum.Employee)]
+        [InlineData(EmployeeRoleEnum.Admin, EmployeeRoleEnum.Leader)]
+        [InlineData(EmployeeRoleEnum.Admin, EmployeeRoleEnum.Director)]
+        [InlineData(EmployeeRoleEnum.Admin, EmployeeRoleEnum.Admin)]
+        public async Task UpdateAsync_ValidateRolePermissions_Success(EmployeeRoleEnum authUserRole, EmployeeRoleEnum userRole)
+        {
+            // Arrange
+            _validEmployee.Role = userRole;
+            _employeeRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(_validEmployee);
+
+            _employeeRepoMock
+                .Setup(x => x.GetByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync(_validEmployee);
+
+            _employeeRepoMock
+                .Setup(x => x.UpdateAsync(It.IsAny<Employee>()))
+                .Returns(Task.CompletedTask);
+
+            var authEmployee = new Employee { Role = authUserRole };
+
+            _employeeRepoMock.Setup(x => x.GetByEmailAsync(It.IsAny<string>())).ReturnsAsync(authEmployee);
+
+            // Act
+            await _service.UpdateAsync(_validEmployee, string.Empty);
+
+            // Assert
+            _employeeRepoMock.Verify(x => x.UpdateAsync(It.Is<Employee>(e => e.FirstName == _validEmployee.FirstName)), Times.Once);
+        }
+
         [Fact]
         public async Task DeleteAsync_Valid_DeleteEmployeeAndUserIdentity()
         {
@@ -300,6 +438,76 @@ namespace ABInBev.Employees.Business.Tests
             // Assert
             _employeeRepoMock.Verify(x => x.DeleteAsync(employee.Id), Times.Once);
             _userManagerMock.Verify(x => x.DeleteAsync(identityUser), Times.Once);
+        }
+
+        [Theory]
+        [InlineData(EmployeeRoleEnum.Employee, EmployeeRoleEnum.Leader)]
+        [InlineData(EmployeeRoleEnum.Employee, EmployeeRoleEnum.Director)]
+        [InlineData(EmployeeRoleEnum.Employee, EmployeeRoleEnum.Admin)]
+        [InlineData(EmployeeRoleEnum.Leader, EmployeeRoleEnum.Director)]
+        [InlineData(EmployeeRoleEnum.Leader, EmployeeRoleEnum.Admin)]
+        [InlineData(EmployeeRoleEnum.Director, EmployeeRoleEnum.Admin)]
+        public async Task DeleteAsync_ValidateRolePermissions_ThrowsException(EmployeeRoleEnum authUserRole, EmployeeRoleEnum userRole)
+        {
+            // Arrange
+            _validEmployee.Role = userRole;
+            _employeeRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(_validEmployee);
+
+            _employeeRepoMock
+                .Setup(x => x.GetByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync(_validEmployee);
+
+            _employeeRepoMock
+                .Setup(x => x.DeleteAsync(It.IsAny<Guid>()))
+                .Returns(Task.CompletedTask);
+
+            var authEmployee = new Employee { Role = authUserRole };
+
+            _employeeRepoMock.Setup(x => x.GetByEmailAsync(It.IsAny<string>())).ReturnsAsync(authEmployee);
+
+            // Act & Assert
+            var exception = await Assert.ThrowsAsync<InvalidOperationException>(() => _service.DeleteAsync(_validEmployee.Id, string.Empty));
+            Assert.Contains($"You are not allowed to delete employees with role {userRole}", exception.Message);
+        }
+
+        [Theory]
+        [InlineData(EmployeeRoleEnum.Employee, EmployeeRoleEnum.Employee)]
+        [InlineData(EmployeeRoleEnum.Leader, EmployeeRoleEnum.Employee)]
+        [InlineData(EmployeeRoleEnum.Leader, EmployeeRoleEnum.Leader)]
+        [InlineData(EmployeeRoleEnum.Director, EmployeeRoleEnum.Employee)]
+        [InlineData(EmployeeRoleEnum.Director, EmployeeRoleEnum.Leader)]
+        [InlineData(EmployeeRoleEnum.Director, EmployeeRoleEnum.Director)]
+        [InlineData(EmployeeRoleEnum.Admin, EmployeeRoleEnum.Employee)]
+        [InlineData(EmployeeRoleEnum.Admin, EmployeeRoleEnum.Leader)]
+        [InlineData(EmployeeRoleEnum.Admin, EmployeeRoleEnum.Director)]
+        [InlineData(EmployeeRoleEnum.Admin, EmployeeRoleEnum.Admin)]
+        public async Task DeleteAsync_ValidateRolePermissions_Success(EmployeeRoleEnum authUserRole, EmployeeRoleEnum userRole)
+        {
+            // Arrange
+            _validEmployee.Role = userRole;
+            var identityUser = new IdentityUser { Id = _validEmployee.UserIdentityId };
+            _employeeRepoMock.Setup(x => x.GetByIdAsync(It.IsAny<Guid>())).ReturnsAsync(_validEmployee);
+
+            _employeeRepoMock
+                .Setup(x => x.GetByEmailAsync(It.IsAny<string>()))
+                .ReturnsAsync(_validEmployee);
+
+            _employeeRepoMock
+                .Setup(x => x.DeleteAsync(It.IsAny<Guid>()))
+                .Returns(Task.CompletedTask);
+
+            var authEmployee = new Employee { Role = authUserRole };
+
+            _employeeRepoMock.Setup(x => x.GetByEmailAsync(It.IsAny<string>())).ReturnsAsync(authEmployee);
+            _userManagerMock.Setup(x => x.FindByIdAsync(_validEmployee.UserIdentityId)).ReturnsAsync(identityUser);
+            _userManagerMock.Setup(x => x.DeleteAsync(identityUser)).ReturnsAsync(IdentityResult.Success);
+
+            // Act
+            await _service.DeleteAsync(_validEmployee.Id, string.Empty);
+
+            // Assert
+            _employeeRepoMock.Verify(x => x.DeleteAsync(_validEmployee.Id), Times.Once);
+            _userManagerMock.Verify(x => x.DeleteAsync(It.IsAny<IdentityUser>()), Times.Once);
         }
 
         [Fact]
