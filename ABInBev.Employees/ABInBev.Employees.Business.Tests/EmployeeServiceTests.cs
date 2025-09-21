@@ -3,8 +3,8 @@ using ABInBev.Employees.Business.Models;
 using ABInBev.Employees.Business.Models.Enums;
 using ABInBev.Employees.Business.Services;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 using Moq;
-using System.Runtime.Intrinsics.X86;
 
 namespace ABInBev.Employees.Business.Tests
 {
@@ -12,6 +12,7 @@ namespace ABInBev.Employees.Business.Tests
     {
         private readonly Mock<IEmployeeRepository> _employeeRepoMock;
         private readonly Mock<UserManager<IdentityUser>> _userManagerMock;
+        private readonly Mock<IConfiguration> _configurationMock;
         private readonly EmployeeService _service;
         private readonly Employee _validEmployee;
 
@@ -24,7 +25,9 @@ namespace ABInBev.Employees.Business.Tests
                 userStoreMock.Object, null, null, null, null, null, null, null, null
             );
 
-            _service = new EmployeeService(_employeeRepoMock.Object, _userManagerMock.Object);
+            _configurationMock = new Mock<IConfiguration>();
+
+            _service = new EmployeeService(_employeeRepoMock.Object, _userManagerMock.Object, _configurationMock.Object);
 
             _validEmployee = new Employee
             {

@@ -1,7 +1,9 @@
 ﻿using ABInBev.Employees.Business.Interfaces;
 using ABInBev.Employees.Business.Models;
+using ABInBev.Employees.Business.Models.Enums;
 using ABInBev.Employees.Business.Models.Validators;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Configuration;
 
 namespace ABInBev.Employees.Business.Services
 {
@@ -9,19 +11,21 @@ namespace ABInBev.Employees.Business.Services
     {
         private readonly IEmployeeRepository _repository;
         private readonly UserManager<IdentityUser> _userManager;
+        private readonly IConfiguration _configuration;
 
-        public EmployeeService(IEmployeeRepository repository, UserManager<IdentityUser> userManager)
+        public EmployeeService(IEmployeeRepository repository, 
+            UserManager<IdentityUser> userManager,
+            IConfiguration configuration)
         {
             _repository = repository;
             _userManager = userManager;
+            _configuration = configuration;
         }
 
         public async Task AddAsync(Employee employee, string password, string emailAuthenticatedUser)
         {
             await ValidatorHelper.ValidateAsync(new EmployeeValidator(_repository, null), employee);
-            var authenticatedUser = await _repository.GetByEmailAsync(emailAuthenticatedUser);
-            if (!authenticatedUser.CanUseRole(employee.Role))
-                throw new InvalidOperationException($"You are not allowed to create employees with role {employee.Role}.");
+            await ValidateUserRole(emailAuthenticatedUser, employee.Role, "create");
 
             var user = new IdentityUser
             {
@@ -49,11 +53,9 @@ namespace ABInBev.Employees.Business.Services
             var employeeDb = await _repository.GetByIdAsync(employee.Id);
             if (employeeDb is null)
                 throw new InvalidOperationException($"The Employee {employee.Id} was not found.");
-            var authenticatedUser = await _repository.GetByEmailAsync(emailAuthenticatedUser);
-            if (!authenticatedUser.CanUseRole(employee.Role))
-                throw new InvalidOperationException($"You are not allowed to edit employees with role {employee.Role}.");
-            if (employee.Role != employeeDb.Role && !authenticatedUser.CanUseRole(employeeDb.Role))
-                throw new InvalidOperationException($"You are not allowed to edit employees with role {employeeDb.Role}.");
+            await ValidateUserRole(emailAuthenticatedUser, employee.Role, "edit");
+            if (employee.Role != employeeDb.Role)
+                await ValidateUserRole(emailAuthenticatedUser, employeeDb.Role, "edit");
 
             employeeDb.BirthDate = employee.BirthDate;
             employeeDb.DocumentNumber = employee.DocumentNumber;
@@ -70,10 +72,8 @@ namespace ABInBev.Employees.Business.Services
         {
             var employee = await GetByIdAsync(id);
             if (employee is null) return;
-            
-            var authenticatedUser = await _repository.GetByEmailAsync(emailAuthenticatedUser);
-            if (!authenticatedUser.CanUseRole(employee.Role))
-                throw new InvalidOperationException($"You are not allowed to delete employees with role {employee.Role}.");
+
+            await ValidateUserRole(emailAuthenticatedUser, employee.Role, "delete");
 
             await _repository.DeleteAsync(id);
 
@@ -95,6 +95,16 @@ namespace ABInBev.Employees.Business.Services
         public async Task<Employee?> GetByEmailAsync(string email)
         {
             return await _repository.GetByEmailAsync(email);
+        }
+
+        private async Task ValidateUserRole(string emailAuthenticatedUser, EmployeeRoleEnum role, string operation)
+        {
+            if (_configuration["AdminUser:Email"] != emailAuthenticatedUser)
+            {
+                var authenticatedUser = await _repository.GetByEmailAsync(emailAuthenticatedUser);
+                if (!authenticatedUser.CanUseRole(role))
+                    throw new InvalidOperationException($"You are not allowed to {operation} employees with role {role}.");
+            }
         }
     }
 }
